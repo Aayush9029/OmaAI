@@ -44,7 +44,7 @@ API key:  ~/.config/omaai/api-key
 ~/.config/omaai/                          model path, private API key and settings
 ```
 
-The model server is not enabled at boot. Load and unload it from the panel, or use `omaai start` and `omaai stop`.
+The model server starts automatically when you log in. Load and unload it from the panel, or use `omaai start` and `omaai stop`.
 
 ## Hardware profile
 

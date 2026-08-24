@@ -45,8 +45,8 @@ chmod 0600 "${api_key_path}"
 chmod 0600 "${HOME}/.config/omaai/env"
 
 systemctl --user daemon-reload
-systemctl --user start omaai.service
+systemctl --user enable --now omaai.service
 timeout 10s omarchy-shell shell rescanPlugins >/dev/null 2>&1 || true
 timeout 10s omarchy plugin enable local.omaai --section right --before omarchy.monitor >/dev/null 2>&1 || true
 
-echo "OmaAI installed. Click the sparkle in the Omarchy bar."
+echo "OmaAI installed and enabled for login. Click the sparkle in the Omarchy bar."
