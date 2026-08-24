@@ -8,7 +8,7 @@
 
 ## Install
 
-Install llama.cpp and download a GGUF model first. Then:
+Install llama.cpp and provide an existing GGUF model:
 
 ```bash
 git clone https://github.com/Aayush9029/OmaAI.git
@@ -16,16 +16,14 @@ cd OmaAI
 ./install.sh ~/Models/your-model.gguf
 ```
 
-That is all. OmaAI does not install llama.cpp, download a model, install Docker, or modify your firewall.
-
-## Use it
+## Use
 
 ```bash
 omaai status
 omaai start|stop|restart
 ```
 
-The Omarchy sparkle opens a panel with load/unload, restart, web UI, endpoint copying, API-key copying, RAM use, GPU load, and VRAM use.
+The Omarchy sparkle controls the model and shows its endpoints, API key, RAM, GPU, and VRAM use.
 
 The OpenAI-compatible API uses:
 
@@ -44,14 +42,10 @@ API key:  ~/.config/omaai/api-key
 ~/.config/omaai/                          model path, private API key and settings
 ```
 
-The model server starts automatically when you log in. Load and unload it from the panel, or use `omaai start` and `omaai stop`.
+The model server starts at login and can be loaded or unloaded from the panel.
 
 ## Hardware profile
 
 The launcher uses full GPU offload, Flash Attention, and one 32K-context slot. It is tested on a Framework Desktop Ryzen AI Max+ 395 / Radeon 8060S, but works with any llama.cpp-supported GPU.
 
-## Sources
-
-- [llama.cpp](https://github.com/ggml-org/llama.cpp)
-
-OmaAI does not redistribute or download model weights.
+Built on [llama.cpp](https://github.com/ggml-org/llama.cpp). OmaAI does not download or redistribute model weights.
