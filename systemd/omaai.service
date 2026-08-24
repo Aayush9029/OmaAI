@@ -1,0 +1,14 @@
+[Unit]
+Description=OmaAI llama.cpp model server
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/omaai-server
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+KillSignal=SIGINT
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,6 @@
+.DS_Store
+*.log
+*.gguf
+*.tar.gz
+.cache/
+__pycache__/

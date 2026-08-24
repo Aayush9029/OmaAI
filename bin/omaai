@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+config_path="${HOME}/.config/omaai/env"
+service_name="omaai.service"
+[[ -r "${config_path}" ]] || { echo "Missing ${config_path}" >&2; exit 1; }
+
+set -a
+source "${config_path}"
+set +a
+
+api_key="$(<"${OMAAI_API_KEY_FILE}")"
+
+lan_ip() {
+  ip -4 -o addr show scope global 2>/dev/null \
+    | awk '$2 != "tailscale0" { split($4, address, "/"); print address[1]; exit }'
+}
+
+tailscale_ip() {
+  ip -4 -o addr show dev tailscale0 2>/dev/null \
+    | awk '{ split($4, address, "/"); print address[1]; exit }'
+}
+
+url_for() {
+  case "${1:-local}" in
+    local) printf 'http://127.0.0.1:%s/v1' "${OMAAI_PORT:-8080}" ;;
+    lan)
+      address="$(lan_ip)"
+      [[ -n "${address}" ]] || return 1
+      printf 'http://%s:%s/v1' "${address}" "${OMAAI_PORT:-8080}"
+      ;;
+    tailscale)
+      address="$(tailscale_ip)"
+      [[ -n "${address}" ]] || return 1
+      printf 'http://%s:%s/v1' "${address}" "${OMAAI_PORT:-8080}"
+      ;;
+  esac
+}
+
+status_json() {
+  active=false
+  ready=false
+  state="stopped"
+  pid=0
+  if systemctl --user is-active --quiet "${service_name}"; then
+    active=true
+    state="loading"
+    pid="$(systemctl --user show "${service_name}" --property MainPID --value)"
+    if curl -fsS --max-time 1 -H "Authorization: Bearer ${api_key}" \
+      "http://127.0.0.1:${OMAAI_PORT:-8080}/health" >/dev/null 2>&1; then
+      ready=true
+      state="ready"
+    fi
+  elif systemctl --user is-failed --quiet "${service_name}"; then
+    state="failed"
+  fi
+
+  read -r ram_total_kib ram_available_kib < <(
+    awk '/^MemTotal:/ { total=$2 } /^MemAvailable:/ { available=$2 } END { print total, available }' /proc/meminfo
+  )
+  ram_total_gib="$(awk -v value="${ram_total_kib:-0}" 'BEGIN { printf "%.1f", value/1048576 }')"
+  ram_used_gib="$(awk -v total="${ram_total_kib:-0}" -v available="${ram_available_kib:-0}" 'BEGIN { printf "%.1f", (total-available)/1048576 }')"
+
+  gpu_percent=-1
+  vram_total_bytes=0
+  vram_used_bytes=0
+  for drm_device in /sys/class/drm/card[0-9]*/device; do
+    if [[ -r "${drm_device}/gpu_busy_percent" ]]; then
+      gpu_percent="$(<"${drm_device}/gpu_busy_percent")"
+      [[ -r "${drm_device}/mem_info_vram_total" ]] && vram_total_bytes="$(<"${drm_device}/mem_info_vram_total")"
+      [[ -r "${drm_device}/mem_info_vram_used" ]] && vram_used_bytes="$(<"${drm_device}/mem_info_vram_used")"
+      break
+    fi
+  done
+  vram_total_gib="$(awk -v value="${vram_total_bytes}" 'BEGIN { printf "%.1f", value/1073741824 }')"
+  vram_used_gib="$(awk -v value="${vram_used_bytes}" 'BEGIN { printf "%.1f", value/1073741824 }')"
+  model_size_gib="$(awk -v value="$(stat -c %s "${OMAAI_MODEL}")" 'BEGIN { printf "%.1f", value/1073741824 }')"
+  model_name="$(basename "${OMAAI_MODEL}" .gguf)"
+
+  lan_url=""
+  tailscale_url=""
+  if [[ "${OMAAI_HOST:-127.0.0.1}" != "127.0.0.1" ]]; then
+    lan_url="$(url_for lan 2>/dev/null || true)"
+    tailscale_url="$(url_for tailscale 2>/dev/null || true)"
+  fi
+
+  printf '{"state":"%s","running":%s,"ready":%s,"pid":%s,"localUrl":"%s","lanUrl":"%s","tailscaleUrl":"%s","model":"%s","details":"%s GB · %s context · Vulkan","ramUsedGiB":%s,"ramTotalGiB":%s,"gpuPercent":%s,"vramUsedGiB":%s,"vramTotalGiB":%s}\n' \
+    "${state}" "${active}" "${ready}" "${pid:-0}" "$(url_for local)" \
+    "${lan_url}" "${tailscale_url}" \
+    "${model_name}" "${model_size_gib}" "${OMAAI_CONTEXT:-32768}" \
+    "${ram_used_gib}" "${ram_total_gib}" "${gpu_percent}" "${vram_used_gib}" "${vram_total_gib}"
+}
+
+notify_copy() {
+  command -v notify-send >/dev/null 2>&1 && notify-send "OmaAI" "$1 copied to clipboard"
+}
+
+case "${1:-status}" in
+  status) status_json ;;
+  start|load) systemctl --user start "${service_name}" ;;
+  stop|unload) systemctl --user stop "${service_name}" ;;
+  restart) systemctl --user restart "${service_name}" ;;
+  toggle)
+    systemctl --user is-active --quiet "${service_name}" \
+      && systemctl --user stop "${service_name}" \
+      || systemctl --user start "${service_name}"
+    ;;
+  open) omarchy-launch-browser "http://127.0.0.1:${OMAAI_PORT:-8080}" ;;
+  copy-url)
+    endpoint="${2:-local}"
+    url="$(url_for "${endpoint}")"
+    printf '%s' "${url}" | wl-copy
+    notify_copy "${endpoint^} URL"
+    ;;
+  copy-key)
+    printf '%s' "${api_key}" | wl-copy
+    notify_copy "API key"
+    ;;
+  *) echo "Usage: omaai {status|start|stop|restart|toggle|open|copy-url local|lan|tailscale|copy-key}" >&2; exit 2 ;;
+esac

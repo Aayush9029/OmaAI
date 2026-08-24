@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "local.omaai",
+  "name": "OmaAI",
+  "version": "0.1.0",
+  "author": "framework",
+  "license": "MIT",
+  "description": "Control a local llama.cpp model from the Omarchy bar.",
+  "kinds": ["bar-widget"],
+  "entryPoints": { "barWidget": "Panel.qml" },
+  "barWidget": {
+    "displayName": "OmaAI",
+    "description": "Control the native llama.cpp Qwen3.8 server from the Omarchy bar.",
+    "category": "System",
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "command": "omaai",
+      "refreshIntervalMs": 3000
+    },
+    "schema": [
+      {
+        "key": "refreshIntervalMs",
+        "type": "integer",
+        "label": "Refresh interval (milliseconds)",
+        "min": 1000,
+        "max": 30000,
+        "step": 1000,
+        "defaultValue": 3000
+      }
+    ]
+  }
+}
