@@ -18,6 +18,9 @@ done
 [[ -f "${model_path}" ]] || { echo "Model not found: ${model_path}" >&2; exit 1; }
 model_path="$(realpath "${model_path}")"
 
+plugin_installed=false
+[[ -f "${HOME}/.config/omarchy/plugins/local.omaai/manifest.json" ]] && plugin_installed=true
+
 mkdir -p \
   "${HOME}/.local/bin" \
   "${HOME}/.config/omaai" \
@@ -34,6 +37,7 @@ api_key_path="${HOME}/.config/omaai/api-key"
 [[ -s "${api_key_path}" ]] || openssl rand -hex 24 >"${api_key_path}"
 chmod 0600 "${api_key_path}"
 
+if [[ ! -f "${HOME}/.config/omaai/env" ]]; then
 {
   printf 'OMAAI_LLAMA_SERVER=%q\n' "$(command -v llama-server)"
   printf 'OMAAI_MODEL=%q\n' "${model_path}"
@@ -42,11 +46,18 @@ chmod 0600 "${api_key_path}"
   printf 'OMAAI_PORT=8080\n'
   printf 'OMAAI_CONTEXT=32768\n'
 } >"${HOME}/.config/omaai/env"
+fi
 chmod 0600 "${HOME}/.config/omaai/env"
 
 systemctl --user daemon-reload
-systemctl --user enable --now omaai.service
+# Preserve the existing on/off preference, including on reinstall.
+# A fresh installation stays off until the user turns it on.
+if systemctl --user is-active --quiet omaai.service; then
+  systemctl --user restart omaai.service
+fi
 timeout 10s omarchy-shell shell rescanPlugins >/dev/null 2>&1 || true
-timeout 10s omarchy plugin enable local.omaai --section right --before omarchy.monitor >/dev/null 2>&1 || true
+if [[ "${plugin_installed}" == false ]]; then
+  timeout 10s omarchy plugin enable local.omaai --section right --before omarchy.monitor >/dev/null 2>&1 || true
+fi
 
-echo "OmaAI installed and enabled for login. Click the sparkle in the Omarchy bar."
+echo "OmaAI installed. The power switch remembers your choice across logins. Click the sparkle in the Omarchy bar."

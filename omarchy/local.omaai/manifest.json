@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "local.omaai",
   "name": "OmaAI",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "framework",
   "license": "MIT",
   "description": "Control a local llama.cpp model from the Omarchy bar.",
@@ -10,7 +10,7 @@
   "entryPoints": { "barWidget": "Panel.qml" },
   "barWidget": {
     "displayName": "OmaAI",
-    "description": "Control the native llama.cpp Qwen3.8 server from the Omarchy bar.",
+    "description": "Control a local llama.cpp model from the Omarchy bar.",
     "category": "System",
     "allowMultiple": false,
     "defaultSection": "right",

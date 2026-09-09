@@ -42,7 +42,9 @@ API key:  ~/.config/omaai/api-key
 ~/.config/omaai/                          model path, private API key and settings
 ```
 
-The model server starts at login and can be loaded or unloaded from the panel.
+The native power switch remembers your choice: turning it on loads the model and enables it at login; turning it off unloads it and keeps it off after a restart. New installations start off. Reinstalling preserves the service’s on/off preference.
+
+The panel follows the Omarchy theme and supports arrow keys (or h/j/k/l), Tab, Enter/Space, and Escape.
 
 ## Hardware profile
 

@@ -13,4 +13,6 @@ if command -v omarchy >/dev/null 2>&1; then
   omarchy plugin validate "${project_dir}/omarchy/local.omaai"
 fi
 
+python3 -B -m unittest discover -s "${project_dir}/tests"
+
 echo "OmaAI checks passed"

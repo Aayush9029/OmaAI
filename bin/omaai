@@ -97,13 +97,18 @@ notify_copy() {
 
 case "${1:-status}" in
   status) status_json ;;
-  start|load) systemctl --user start "${service_name}" ;;
-  stop|unload) systemctl --user stop "${service_name}" ;;
-  restart) systemctl --user restart "${service_name}" ;;
+  start|load) systemctl --user enable --now "${service_name}" ;;
+  stop|unload) systemctl --user disable --now "${service_name}" ;;
+  restart)
+    systemctl --user enable "${service_name}"
+    systemctl --user restart "${service_name}"
+    ;;
   toggle)
-    systemctl --user is-active --quiet "${service_name}" \
-      && systemctl --user stop "${service_name}" \
-      || systemctl --user start "${service_name}"
+    if systemctl --user is-active --quiet "${service_name}"; then
+      systemctl --user disable --now "${service_name}"
+    else
+      systemctl --user enable --now "${service_name}"
+    fi
     ;;
   open) omarchy-launch-browser "http://127.0.0.1:${OMAAI_PORT:-8080}" ;;
   copy-url)
