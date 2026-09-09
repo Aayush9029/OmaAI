@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/omaai-panel.png" width="520" alt="OmaAI Omarchy panel">
+  <img src="assets/omaai-panel.png" width="100%" alt="OmaAI native Omarchy panel with model power switch, resource usage, and API endpoints">
 </p>
 
 <h1 align="center">OmaAI</h1>
