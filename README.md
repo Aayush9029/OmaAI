@@ -38,7 +38,7 @@ API key:  ~/.config/omaai/api-key
 ```text
 ~/.local/bin/omaai*                       controller and launcher
 ~/.config/systemd/user/omaai.service      llama.cpp user service
-~/.config/omarchy/plugins/local.omaai/    menu-bar plugin
+~/.config/omarchy/plugins/io.github.aayush9029.omaai/    menu-bar plugin
 ~/.config/omaai/                          model path, private API key and settings
 ```
 

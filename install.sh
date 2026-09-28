@@ -18,20 +18,26 @@ done
 [[ -f "${model_path}" ]] || { echo "Model not found: ${model_path}" >&2; exit 1; }
 model_path="$(realpath "${model_path}")"
 
+plugin_id="io.github.aayush9029.omaai"
+plugins_dir="${HOME}/.config/omarchy/plugins"
 plugin_installed=false
-[[ -f "${HOME}/.config/omarchy/plugins/local.omaai/manifest.json" ]] && plugin_installed=true
+[[ -f "${plugins_dir}/${plugin_id}/manifest.json" ]] && plugin_installed=true
+# Earlier versions installed the widget as local.omaai.
+if [[ -d "${plugins_dir}/local.omaai" ]]; then
+  omarchy plugin remove local.omaai --yes >/dev/null 2>&1 || rm -rf "${plugins_dir}/local.omaai"
+fi
 
 mkdir -p \
   "${HOME}/.local/bin" \
   "${HOME}/.config/omaai" \
   "${HOME}/.config/systemd/user" \
-  "${HOME}/.config/omarchy/plugins/local.omaai"
+  "${plugins_dir}/${plugin_id}/omarchy"
 
 install -m 0755 "${project_dir}/bin/omaai" "${HOME}/.local/bin/omaai"
 install -m 0755 "${project_dir}/bin/omaai-server" "${HOME}/.local/bin/omaai-server"
 install -m 0644 "${project_dir}/systemd/omaai.service" "${HOME}/.config/systemd/user/omaai.service"
-install -m 0644 "${project_dir}/omarchy/local.omaai/manifest.json" "${HOME}/.config/omarchy/plugins/local.omaai/manifest.json"
-install -m 0644 "${project_dir}/omarchy/local.omaai/Panel.qml" "${HOME}/.config/omarchy/plugins/local.omaai/Panel.qml"
+install -m 0644 "${project_dir}/manifest.json" "${plugins_dir}/${plugin_id}/manifest.json"
+install -m 0644 "${project_dir}/omarchy/Panel.qml" "${plugins_dir}/${plugin_id}/omarchy/Panel.qml"
 
 api_key_path="${HOME}/.config/omaai/api-key"
 [[ -s "${api_key_path}" ]] || openssl rand -hex 24 >"${api_key_path}"
@@ -57,7 +63,7 @@ if systemctl --user is-active --quiet omaai.service; then
 fi
 timeout 10s omarchy-shell shell rescanPlugins >/dev/null 2>&1 || true
 if [[ "${plugin_installed}" == false ]]; then
-  timeout 10s omarchy plugin enable local.omaai --section right --before omarchy.monitor >/dev/null 2>&1 || true
+  timeout 10s omarchy plugin enable "${plugin_id}" --section right --before omarchy.monitor >/dev/null 2>&1 || true
 fi
 
 echo "OmaAI installed. The power switch remembers your choice across logins. Click the sparkle in the Omarchy bar."

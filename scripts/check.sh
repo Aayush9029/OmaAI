@@ -7,10 +7,10 @@ bash -n \
   "${project_dir}/install.sh" \
   "${project_dir}/bin/omaai" \
   "${project_dir}/bin/omaai-server"
-jq empty "${project_dir}/omarchy/local.omaai/manifest.json"
+jq empty "${project_dir}/manifest.json"
 
 if command -v omarchy >/dev/null 2>&1; then
-  omarchy plugin validate "${project_dir}/omarchy/local.omaai"
+  omarchy plugin validate "${project_dir}"
 fi
 
 python3 -B -m unittest discover -s "${project_dir}/tests"

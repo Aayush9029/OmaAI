@@ -1,13 +1,17 @@
 {
   "schemaVersion": 1,
-  "id": "local.omaai",
+  "id": "io.github.aayush9029.omaai",
   "name": "OmaAI",
   "version": "0.1.1",
-  "author": "framework",
+  "author": "Aayush Pokharel",
   "license": "MIT",
   "description": "Control a local llama.cpp model from the Omarchy bar.",
-  "kinds": ["bar-widget"],
-  "entryPoints": { "barWidget": "Panel.qml" },
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "omarchy/Panel.qml"
+  },
   "barWidget": {
     "displayName": "OmaAI",
     "description": "Control a local llama.cpp model from the Omarchy bar.",

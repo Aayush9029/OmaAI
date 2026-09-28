@@ -9,8 +9,8 @@ import qs.Ui as Ui
 
 Panel {
   id: app
-  moduleName: "local.omaai"
-  ipcTarget: "local.omaai"
+  moduleName: "io.github.aayush9029.omaai"
+  ipcTarget: "io.github.aayush9029.omaai"
   manageIpc: false
 
   property var snapshot: ({
