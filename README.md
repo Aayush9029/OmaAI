@@ -36,10 +36,10 @@ API key:  ~/.config/omaai/api-key
 ## What gets installed
 
 ```text
-~/.local/bin/omaai*                       controller and launcher
-~/.config/systemd/user/omaai.service      llama.cpp user service
-~/.config/omarchy/plugins/io.github.aayush9029.omaai/    menu-bar plugin
-~/.config/omaai/                          model path, private API key and settings
+~/.local/bin/omaai*                                    controller and launcher
+~/.config/systemd/user/omaai.service                   llama.cpp user service
+~/.config/omarchy/plugins/io.github.aayush9029.omaai/  menu-bar plugin
+~/.config/omaai/                                       model path, private API key and settings
 ```
 
 The native power switch remembers your choice: turning it on loads the model and enables it at login; turning it off unloads it and keeps it off after a restart. New installations start off. Reinstalling preserves the service’s on/off preference.
