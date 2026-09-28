@@ -249,6 +249,8 @@ Panel {
           }
           MetricRow {
             label: "GPU"
+            showMeter: true
+            meterValue: Number(app.snapshot.gpuPercent) / 100
             value: Number(app.snapshot.gpuPercent) >= 0 ? Number(app.snapshot.gpuPercent) + "%" : "Unavailable"
           }
           MetricRow {
@@ -315,11 +317,54 @@ Panel {
   }
 
   component MetricRow: RowLayout {
+    id: metricRow
     property string label: ""
     property string value: ""
+    property bool showMeter: false
+    property real meterValue: -1
     width: parent.width
-    Text { text: label; color: app.muted; font.family: app.fontFamily; font.pixelSize: Style.font.body }
-    Text { Layout.fillWidth: true; horizontalAlignment: Text.AlignRight; text: value; color: app.foreground; font.family: app.fontFamily; font.pixelSize: Style.font.body }
+    spacing: Style.space(10)
+
+    Text {
+      text: metricRow.label
+      Layout.preferredWidth: metricRow.showMeter ? Style.space(52) : implicitWidth
+      color: app.muted
+      font.family: app.fontFamily
+      font.pixelSize: Style.font.body
+    }
+
+    // Match the Agents panel's token-by-day meter, including its theme and motion.
+    Rectangle {
+      id: meterTrack
+      visible: metricRow.showMeter
+      Layout.fillWidth: true
+      Layout.alignment: Qt.AlignVCenter
+      implicitHeight: Math.max(Style.space(4), Math.round(Style.spacing.controlHeight * 0.14))
+      radius: height / 2
+      color: Style.selectedFillFor(app.foreground, Color.accent)
+
+      Rectangle {
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        height: parent.height
+        radius: parent.radius
+        width: parent.width * (isFinite(metricRow.meterValue) ? Math.max(0, Math.min(1, metricRow.meterValue)) : 0)
+        color: app.foreground
+        Behavior on width {
+          NumberAnimation { duration: 160; easing.type: Easing.OutCubic }
+        }
+      }
+    }
+
+    Text {
+      Layout.fillWidth: !metricRow.showMeter
+      Layout.minimumWidth: metricRow.showMeter ? Style.space(36) : 0
+      horizontalAlignment: Text.AlignRight
+      text: metricRow.value
+      color: app.foreground
+      font.family: app.fontFamily
+      font.pixelSize: Style.font.body
+    }
   }
 
   component NativeButton: Ui.Button {
